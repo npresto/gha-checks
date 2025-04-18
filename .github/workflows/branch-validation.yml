@@ -18,7 +18,7 @@ jobs:
           if [ "$DESTINATION" = "main" ]; then
             ALLOWED_PREFIXES=("release/" "hotfix/")
             echo "Destination is main. Allowed prefixes: ${ALLOWED_PREFIXES[*]}"
-          elif [ "$DESTINATION" = "development" ]; then
+          elif [ "$DESTINATION" = "develop" ]; then
             ALLOWED_PREFIXES=("warmfix/" "feature/" "docs/")
             echo "Destination is development. Allowed prefixes: ${ALLOWED_PREFIXES[*]}"
           else
