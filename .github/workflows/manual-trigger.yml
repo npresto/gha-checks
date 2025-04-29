@@ -1,0 +1,20 @@
+name: Manual Trigger Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for triggering the workflow'
+        required: false
+        default: 'Manual trigger'
+
+jobs:
+  manual-job:
+    runs-on: [customer-tools]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: EchoJunk
+        run: |
+          echo "I'M TALKIN HERE"
