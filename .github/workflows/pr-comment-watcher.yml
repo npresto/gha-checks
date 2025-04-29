@@ -1,30 +1,50 @@
-name: PR Comment Trigger for Manual Workflow
+name: PR Comment Trigger for Empty Commit
 on:
   issue_comment:
     types: [created]
 
 # Explicitly set permissions for the GITHUB_TOKEN
 permissions:
-  contents: read
-  actions: write
-  pull-requests: write
+  contents: write
+  pull-requests: read
 
 jobs:
-  trigger-workflow:
+  push-empty-commit:
     if: ${{ github.event.issue.pull_request && github.event.comment.body == '!ANTS' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Manual Workflow
+      - name: Get PR information
         uses: actions/github-script@v6
+        id: get-pr
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.rest.actions.createWorkflowDispatch({
+            const { data: pullRequest } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'manual-trigger.yml',
-              ref: 'main',
-              inputs: {
-                reason: 'Triggered by PR comment !ANTS'
-              }
-            })
+              pull_number: context.issue.number
+            });
+            return {
+              head_ref: pullRequest.head.ref,
+              head_sha: pullRequest.head.sha,
+              head_repo_full_name: pullRequest.head.repo.full_name
+            }
+          result-encoding: json
+
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ fromJSON(steps.get-pr.outputs.result).head_repo_full_name }}
+          ref: ${{ fromJSON(steps.get-pr.outputs.result).head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Push empty commit
+        run: |
+          git commit --allow-empty -m "Empty commit triggered by !ANTS comment"
+          git push
