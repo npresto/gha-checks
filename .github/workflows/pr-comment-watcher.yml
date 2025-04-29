@@ -5,9 +5,9 @@ on:
 jobs:
   spread:
     if: ${{ github.event.issue.pull_request }}
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: say hello
-      if: contains(github.event.comment.body, '!ANTS')
-      run: |
-        echo "I want to die"
+        if: contains(github.event.comment.body, '!ANTS')
+        run: |
+          echo "I want to die"
