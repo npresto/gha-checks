@@ -1,13 +1,23 @@
-name: pull request comment
+name: PR Comment Trigger for Manual Workflow
 on:
   issue_comment:
-    types: [created, edited, deleted]
+    types: [created]
 jobs:
-  spread:
-    if: ${{ github.event.issue.pull_request }}
+  trigger-workflow:
+    if: ${{ github.event.issue.pull_request && github.event.comment.body == '!ANTS' }}
     runs-on: ubuntu-latest
     steps:
-      - name: say hello
-        if: contains(github.event.comment.body, '!ANTS')
-        run: |
-          echo "I want to die"
+      - name: Trigger Manual Workflow
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'manual-trigger.yml',
+              ref: 'main',
+              inputs: {
+                reason: 'Triggered by PR comment !ANTS'
+              }
+            })
