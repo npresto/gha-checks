@@ -2,6 +2,13 @@ name: PR Comment Trigger for Manual Workflow
 on:
   issue_comment:
     types: [created]
+
+# Explicitly set permissions for the GITHUB_TOKEN
+permissions:
+  contents: read
+  actions: write
+  pull-requests: write
+
 jobs:
   trigger-workflow:
     if: ${{ github.event.issue.pull_request && github.event.comment.body == '!ANTS' }}
