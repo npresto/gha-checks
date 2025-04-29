@@ -10,7 +10,7 @@ on:
 
 jobs:
   manual-job:
-    runs-on: [customer-tools]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
