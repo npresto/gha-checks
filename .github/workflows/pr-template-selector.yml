@@ -37,7 +37,7 @@ jobs:
 
               
               const decodedContent = Buffer.from(templateContent.content, 'base64').toString();
-              console.log(`Successfully fetched template content`);
+              console.log(`Successfully fetched template content` + decodedContent);
 
               await github.rest.pulls.update({
                 owner: context.repo.owner,
