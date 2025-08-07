@@ -4,6 +4,10 @@ on:
   pull_request_target:
     types: [opened]
 
+permissions:
+  contents: write # Or read, depending on the action
+  pull-requests: write
+
 jobs:
   select-template:
     runs-on: ubuntu-latest
