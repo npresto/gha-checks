@@ -1,0 +1,52 @@
+name: PR Template Selector
+
+on:
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  select-template:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Automatically populate PR description with template
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prBranch = context.payload.pull_request.head.ref;
+            console.log(`PR branch: ${prBranch}`);
+
+            let templatePath;
+
+            if (prBranch.startsWith('release/')) {
+              templatePath = 'PULL_REQUEST_TEMPLATE/pull_request_template_main.md';
+            } else {
+              templatePath = 'PULL_REQUEST_TEMPLATE/pull_request_template_release.md';
+            }
+
+            console.log(`Using template: ${templatePath}`);
+
+            // Fetch the template from the repository
+            try {
+              const { data: templateContent } = await github.rest.repos.getContent({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: `.github/${templatePath}`,
+                ref: context.payload.pull_request.base.ref
+              });
+
+              
+              const decodedContent = Buffer.from(templateContent.content, 'base64').toString();
+              console.log(`Successfully fetched template content`);
+
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                body: decodedContent
+              });
+
+              console.log(`Successfully updated PR description with template content`);
+            } catch (error) {
+              console.error(`Error fetching or updating template: ${error.message}`);
+            }
